@@ -17,13 +17,13 @@ Użytkownik pobiera naszą aplikację, by zacząć kontrolować swoje nawyki ży
 Mając 24 godziny na zrealizowanie tak złożonego pomysłu nie udało się ukończyć go w stu procentach. Mimo to, w niedzielę rano byliśmy pod wrażeniem jak dużo udało się osiągnać! Co prawda, gdy aplikacja wysyłała zdjęcie pomarańczy, to najczęściej otrzymywała odpowiedź 'Fruit' lub "Citrus fruit", ale hej! TO DZIAŁA!
 
 ## Jak zacząłem rozpoznawać obrazy w Rubim
-Coś tam słyszałem o Tensorflow, ale nie za wiele. Zgłębiłem się zatem w temat. Szybko znalazłem repozytorium [tensorflow.rb](https://github.com/somaticio/tensorflow.rb). Pomyślałem 'wow! świetnie! wszystko odpalę u siebie na komputerze i nie będzie problemu!'. Gdy próbowałem zainstalować Tensorflow na moim lapku i po raz trzeci system został zamrożony, tak, że przestała odpowiadać nawet myszka, stwierdziłem, że musi istnieć inne rozwiązanie.  Znalazłem AWS Rekognition.  
+Coś tam słyszałem o Tensorflow, ale nie za wiele. Zgłębiłem się zatem w temat. Szybko znalazłem repozytorium [tensorflow.rb](https://github.com/somaticio/tensorflow.rb). Pomyślałem 'wow! świetnie! wszystko odpalę u siebie na komputerze i nie będzie problemu!'. Gdy próbowałem zainstalować Tensorflow na moim lapku i po raz trzeci system został kompletnie zawieszony, stwierdziłem, że musi istnieć inne rozwiązanie.  Znalazłem AWS Rekognition.  
 
 Amazon Web Services udostępnia usługę rozpoznawania obrazów za darmo do 5000 requestów na miesiąc. Idealny plan na hackathon. Konto na AWS już miałem, więc musiałem tylko dodać tą usługę do użytkownika. Po drodze znalazłem całkiem przydatny artykuł na [Medium](https://medium.com/statuscode/how-to-detect-image-contents-from-ruby-with-amazon-rekognition-46a962cb040f).
 
 Dodałem wygenerowane klucze do `rails credentials` (moim zdaniem super rozwiązanie), zainstalowałem gem `aws-sdk` i byłem niemal gotów do rozpoznawania obiektów na obrazach wysyłanych z aplikacji!
 
-Ustaliliśmy, że będę otrzymywał obrazki zakodowane w base64. Dzięki temu mogłem zrezygnować z przechowywania obrazów w formie plików na serwerze, więc deploy na Heroku był o wiele szybszy. Tak się złożyło, że Ruby świetnie sobie poradził z przekonwertowaniem base64 do bajcików, które chciał otrzymać AWS. A więc jedyne co musiałem zrobić to:
+Ustaliliśmy, że będę otrzymywał obrazki zakodowane w base64. Dzięki temu mogłem zrezygnować z przechowywania obrazów w formie plików na serwerze, więc deploy na Heroku był o wiele prostszy i szybszy. Tak się złożyło, że Ruby świetnie sobie poradził z przekonwertowaniem base64 do bajcików, które chciał otrzymać AWS. A więc jedyne co musiałem zrobić to:
 ```ruby
 # app/controllers/concerns/file_converter.rb
 module FileConverter
@@ -51,7 +51,7 @@ module AwsCaller
     # resp.labels.each do |label|
     #   puts "#{label.name}-#{label.confidence.to_i}"
     # end
-    return resp.labels.first.name
+    resp.labels.first.name
   end
 end
 ```
@@ -60,11 +60,11 @@ Jak widać w ostatnich linijkach zakomentowałem listowanie wyników i ich prawd
 Citrus Fruit-99
 Lemon-98
 Fruit-98
-Plant-98
+Plant-97
 ...
 ```
 Cały kontroler odpowiedzialny za obsługę zdjęć wyglądał tak:
-```
+```ruby
 # app/controllers/api/files_controller.rb
 class Api::FilesController < ApplicationController
   include Api::AwsCaller
@@ -117,8 +117,7 @@ module Nutritionix
         req.headers['x-remote-user-id'] = '0'
       end
 
-      response = JSON.parse(request.body)
-      response
+      JSON.parse(request.body)
     end
   end
 
@@ -142,7 +141,7 @@ module Nutritionix
   end
 end
 ```
-Trochę sporo się dzieje, ale nie ma tu nic skomplikowanego. Moje metody są nawet dość prymitywne. Za pozyskiwanie ilości wody trochę nawet mi wstyd. Ale działało, więc nie przejmowałem się tym wtedy. (attr_id == 255 dlatego, że takie id miała właśnie woda)
+Trochę sporo się dzieje, ale nie ma tu nic skomplikowanego. (attr_id == 255 dlatego, że takie id miała właśnie woda)
 W `Nutritionix::Caller` najpierw 'ustanawiam' połączenie z API i zwracam wynik zapytania (połączenie nazwy posiłku z jego wagą), a w `Nutritionix::Parser` porządkuję odpowiedź, żeby była bardziej przystępna dla aplikacji mobilnej. Nutritionix zwraca bardzo dużo informacji, których nie do końca potrzebowaliśmy w tym momencie, więc po prostu nie puszczałem ich dalej.
 
 W kontrolerze wywoływałem tylko metody z modelu, które odwoływały się do modułu powyżej.
