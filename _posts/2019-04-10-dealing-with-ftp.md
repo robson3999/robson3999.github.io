@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Dealing with FTP #1"
-date: 2019-04-20T20:09:41+01:00
+date: 2019-04-10T20:09:41+01:00
 draft: false
 keywords: "rubyonrails, ruby, ftp"
 ---
