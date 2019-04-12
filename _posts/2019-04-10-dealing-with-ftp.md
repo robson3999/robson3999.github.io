@@ -14,7 +14,7 @@ W tym cyklu przedstawię schemat prostej aplikacji do obsługi zdalnego serwera 
 
 W pierwszej części zajmiemy się listowaniem plików.
 
-Jak widać jest to prosty CRUDowy schemat, jednak będziemy poruszać się na dwóch płaszczyznach. Pierwszej - bazie danych, w której będziemy zapisywać dane n.t. rekordów na serwerze (tak, aby nie odpytywać serwera przy każdym odświeżeniu strony), oraz druga - pliki na FTP.
+Jak widać jest to prosty CRUDowy schemat, jednak będziemy poruszać się na dwóch płaszczyznach. Pierwszej - bazie danych, w której będziemy zapisywać dane n.t. rekordów na serwerze (tak, aby nie odpytywać serwera przy każdym odświeżeniu strony), oraz drugiej - pliki na FTP.
 
 Rozpocznijmy utworzeniem kontrolera i modelu o nazwie Medium.
 ```ruby
