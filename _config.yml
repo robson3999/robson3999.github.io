@@ -9,8 +9,8 @@ cover         : "" # image uri like logo/cover image for site seo
 
 google_analytics  : UA-125799130-1
 twitter_username  : ""
-comments_enabled  : false # if enabled (set to true), please provide your disqus_username
-disqus_shortname  : ""
+comments_enabled  : true # if enabled (set to true), please provide your disqus_username
+disqus_shortname  : "rglod"
 postshare_enabled : false
 
 # Build settings
@@ -34,6 +34,7 @@ plugins:
   - jekyll-sitemap
   - bourbon
   - jekyll-paginate
+  - jekyll-admin
 
 # navbar pages
 navbar:

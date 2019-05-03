@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <title></title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        <link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        <script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+    </head>
+    <body>
+        <hr>
+<h2 id="layout-posttitle-%22dealing-with-ftp-2%22draft-falsecomments-truekeywords-%22rubyonrails-ruby-ftp%22">layout: post
+title: &quot;Dealing with FTP #2&quot;
+draft: false
+comments: true
+keywords: &quot;rubyonrails, ruby, ftp&quot;</h2>
+<p>W dzisiejszym wpisie przedstawię jak zachować pobierane dane w naszej bazie danych, tak, aby ograniczyć ilość zapytań do zewnętrznego serwera do minimum.<br>
+Mając metodę z poprzedniego wpisu <code>Media::ListFiles</code> pobieramy listę nazw wszystkich plików. Teraz zajmiemy się zapisywaniem ich w bazie.</p>
+<p>Ostatnio wygenerowaliśmy model <code>Medium</code>, który posłuży nam do przechowywania danych. Stwórzmy zatem serwisy do dodawania i usuwania rekordów.</p>
+<pre><code class="language-ruby"><div><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Media</span></span>
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Create</span></span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">call</span><span class="hljs-params">(params)</span></span>
+      medium = Medium.new(params)
+      <span class="hljs-keyword">return</span> <span class="hljs-string">'Failed'</span> <span class="hljs-keyword">unless</span> medium.save
+
+      medium
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</div></code></pre>
+<pre><code class="language-ruby"><div><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Media</span></span>
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Destroy</span></span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">call</span><span class="hljs-params">(medium)</span></span>
+      <span class="hljs-keyword">return</span> <span class="hljs-string">'Failed'</span> <span class="hljs-keyword">unless</span> medium.destroy
+
+      medium
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</div></code></pre>
+<p>Wykorzystamy je w serwisie służącym do synchronizacji danych aplikacji z plikami na serwerze FTP. Zaczniemy od pobrania listy(<code>ftp_media</code>),
+następnie usuniemy z naszej bazy rekordy, które nie pojawiły się w odpowiedzi z serwera (<code>remove_records_not_present_on_ftp</code>), a
+na końcu dodamy rekordy, których nie mamy zapisanych lokalnie(<code>add_records_present_on_ftp</code>).</p>
+<pre><code class="language-ruby"><div><span class="hljs-keyword">require</span> <span class="hljs-string">'net/ftp'</span>
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Media</span></span>
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SyncWithFTP</span> &lt; ApplicationService</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">call</span></span>
+      ftp_media = ListFiles.new.call
+
+      remove_records_not_present_on_ftp(ftp_media)
+      add_records_present_on_ftp(ftp_media)
+    <span class="hljs-keyword">end</span>
+
+    private
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">remove_records_not_present_on_ftp</span><span class="hljs-params">(ftp_media)</span></span>
+      Media.all.reject { <span class="hljs-params">|m|</span> ftp_media.<span class="hljs-keyword">include</span>?(m.name) }.each <span class="hljs-keyword">do</span> <span class="hljs-params">|medium|</span>
+        Destroy.new.call(<span class="hljs-symbol">medium:</span> medium)
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">add_records_present_on_ftp</span><span class="hljs-params">(ftp_media)</span></span>
+      Net::FTP.open(host) <span class="hljs-keyword">do</span> <span class="hljs-params">|ftp|</span>
+        ftp.login(username, password)
+
+        ftp_media.reject { <span class="hljs-params">|f|</span> Media.pluck(<span class="hljs-symbol">:name</span>).<span class="hljs-keyword">include</span>?(f) }.each <span class="hljs-keyword">do</span> <span class="hljs-params">|medium|</span>
+          Create.new.call(<span class="hljs-symbol">media_params:</span> medium_params(medium, ftp))
+        <span class="hljs-keyword">end</span>
+      <span class="hljs-keyword">rescue</span> Net::FTPPermError =&gt; e
+        puts e
+        failure(I18n.t(<span class="hljs-string">'projects.ftp.conn_refused'</span>))
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">medium_params</span><span class="hljs-params">(medium, ftp)</span></span>
+      { <span class="hljs-symbol">name:</span> medium, <span class="hljs-symbol">bytesize:</span> ftp.size(medium),
+        <span class="hljs-symbol">mimetype:</span> medium.split(<span class="hljs-string">'.'</span>)[-<span class="hljs-number">1</span>] }
+    <span class="hljs-keyword">rescue</span> Net::FTPPermError
+      { <span class="hljs-symbol">name:</span> medium, <span class="hljs-symbol">mimetype:</span> medium.split(<span class="hljs-string">'.'</span>)[-<span class="hljs-number">1</span>] }
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</div></code></pre>
+<p>Przyjrzyjmy się jeszcze metodzie <code>add_records_present_on_ftp</code>. Otwieramy tutaj połączenie z serwerem, ponieważ potrzebujemy dostępu do informacji o rozmiarach plików, które zapiszemy w bazie. A więc przekazujemy połączenie w zmiennej <code>ftp</code> do metody <code>medium_params</code>, a tam, dzięki <code>ftp.size(#NAZWA_PLIKU)</code> otrzymujemy jego rozmiar w bajtach. Tak &quot;sparsowane&quot; parametry <code>Medium</code> przekazujemy do serwisu <code>Media::Create</code> utworzonego na początku tego wpisu.</p>
+<p>Po wykonaniu <code>Media::SyncWithFTP</code> powinniśmy mieć w bazie danych rekordy odwzorowujące stan plików z serwera FTP.</p>
+
+    </body>
+    </html>

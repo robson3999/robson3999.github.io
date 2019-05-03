@@ -2,6 +2,7 @@
 layout: post
 title: "Dealing with FTP #2"
 draft: false
+comments: true
 keywords: "rubyonrails, ruby, ftp"
 ---
 
