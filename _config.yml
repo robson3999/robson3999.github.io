@@ -10,7 +10,7 @@ cover         : "" # image uri like logo/cover image for site seo
 google_analytics  : UA-125799130-1
 twitter_username  : ""
 comments_enabled  : true # if enabled (set to true), please provide your disqus_username
-disqus_shortname  : "rglod"
+disqus_shortname  : "rgblog-1"
 postshare_enabled : false
 
 # Build settings
