@@ -1,9 +1,8 @@
 ---
+title: 'Dealing with FTP #2'
 layout: post
-title: "Dealing with FTP #2"
-draft: false
 comments: true
-keywords: "rubyonrails, ruby, ftp"
+keywords: rubyonrails, ruby, ftp
 ---
 
 W dzisiejszym wpisie przedstawię jak zachować pobierane dane w naszej bazie danych, tak, aby ograniczyć ilość zapytań do zewnętrznego serwera do minimum.  
@@ -66,7 +65,7 @@ module Media
         end
       rescue Net::FTPPermError => e
         puts e
-        failure(I18n.t('projects.ftp.conn_refused'))
+        failure('Connection refused')
       end
     end
 
