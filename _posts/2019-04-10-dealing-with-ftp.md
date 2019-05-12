@@ -1,16 +1,15 @@
 ---
+title: 'Dealing with FTP #1'
 layout: post
-title: "Dealing with FTP #1"
-date: 2019-04-10T20:09:41+01:00
-draft: false
-keywords: "rubyonrails, ruby, ftp"
+date: '2019-04-10 20:09:41 +0100'
+keywords: rubyonrails, ruby, ftp
 ---
 
 W tym cyklu przedstawię schemat prostej aplikacji do obsługi zdalnego serwera FTP. Będzie ona pozwalała nam na:
-- pobieranie listy zapisanych na serwerze plików, (index)
-- usuwanie wybranego pliku z serwera, (delete)
-- pobieranie wybranego pliku na lokalny komputer, (read)
-- wysyłanie lokalnego pliku na serwer. (create)
+- [pobieranie listy zapisanych na serwerze plików](/2019/dealing-with-ftp/),
+- [synchronizowanie bazy danych z serwerem](/2019/dealing-with-ftp-2/), 
+- [wysyłanie lokalnego pliku na serwer](/2019/dealing-with-ftp-3/),
+- usuwanie wybranego pliku z serwera.
 
 W pierwszej części zajmiemy się listowaniem plików.
 

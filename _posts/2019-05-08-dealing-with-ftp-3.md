@@ -7,7 +7,7 @@ keywords: rubyonrails, ruby, ftp
 [Ostatnio](/2019/dealing-with-ftp-2/) zsynchronizowaliśmy bazę danych z plikami zdalnymi. Dziś zajmiemy się wysyłaniem i zapisywaniem plików lokalnych na zewnętrzym serwerze oraz w bazie danych.
 Czynności, które musimy wykonać to:
 - połaczenie z serwerem, zapisanie na nim wybranego pliku,
-- zapisanie informacji n.t. nowego pliku w bazie danych
+- zapisanie informacji n.t. nowego pliku w bazie danych.
 
 Tak jak poprzednio, akcje te podzielimy na osobne serwisy. Rozpoczniemy od połączenia z serwerem i tak samo jak w poprzednich przykładach serwis będzie dziedziczył z `ApplicationService` w celu ułatwienia nam połączenia.
 ```ruby
@@ -27,7 +27,7 @@ module Media
   end
 end
 ```
-Tak, do zapisania pliku, po połączeniu z serwerem wystarczy tylko jedna linijka kodu! A dokładniej metoda `putbinaryfile`. W tym przypadku korzystamy z `file.tempfile` oraz `file.original_filename`, ponieważ zakładamy, że plik, który został przekazany do funkcji `call` został wysłany do kontrolera przez formularz. Tzn. użytkownik wszedł na stronę, w formularzu wybrał plik z komputera, który chciał wysłać i go zatwierdził. Do przykładowego kodu kontrolera dojdziemy za chwilę, wróćmy jeszcze do zapisywania pliku.  
+Do zapisania pliku, po połączeniu z serwerem, wystarczy tylko jedna linijka kodu! A dokładniej metoda `putbinaryfile`. W tym przypadku korzystamy z `file.tempfile` oraz `file.original_filename`, ponieważ zakładamy, że plik, który został przekazany do funkcji `call` został wysłany do kontrolera przez formularz. Tzn. użytkownik wszedł na stronę, w formularzu wybrał plik z komputera, który chciał wysłać i go zatwierdził. Do przykładowego kodu kontrolera dojdziemy za chwilę, wróćmy jeszcze do zapisywania pliku.  
 
 Po udanym zapisie na zewnętrznym serwerze, musimy zachować dane n.t. pliku w  bazie danych (aby nie musieć po każdym uploadzie wykonywać synchronizacji). Posłuży nam do tego napisany ostatnio serwis `Media::Create`.  Proponuję, by akcje zapisu na serwerze oraz rejestrowania w bazie danych "opakować" w jeszcze jeden serwis, który będzie wywoływany przez kontroler.
 ```ruby
