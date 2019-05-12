@@ -1,7 +1,7 @@
 ---
 title: 'Dealing with FTP #3'
 layout: post
-keywords: rubyonrails, ruby, ftp
+keywords: rubyonrails, ruby, ftp, files
 ---
 
 [Ostatnio](/2019/dealing-with-ftp-2/) zsynchronizowaliśmy bazę danych z plikami zdalnymi. Dziś zajmiemy się wysyłaniem i zapisywaniem plików lokalnych na zewnętrzym serwerze oraz w bazie danych.
