@@ -3,7 +3,7 @@ title_left    : "robert"
 title_right   : "g" # default: ""
 description   : "robert głód blog"
 keywords      : ""
-url           : "https://rbglod.com"
+url           : "https://robson3999.github.io"
 baseurl       : "" # apply repo name like "/myproject" if used under gh-pages branch, else (under master branch) just leave empty/blank
 cover         : "" # image uri like logo/cover image for site seo
 
